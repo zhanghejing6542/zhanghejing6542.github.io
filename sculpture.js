@@ -26,8 +26,10 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
    texture.offset.set((1-texture.repeat.x)/2,(1-texture.repeat.y)/2);
   };
   runtime.projects.forEach(project=>{
-   const item={texture:null,poster:null,live:null};textures.set(project.id,item);
-   const poster=loader.load(project.videoPoster||project.cover,texture=>{
+   const item={texture:null,poster:null,live:null,posterRequested:false};textures.set(project.id,item);
+   item.loadPoster=()=>{
+   if(item.posterRequested)return;item.posterRequested=true;
+   const poster=loader.load(project.sculptureCover||project.videoPoster||project.cover,texture=>{
     if(project.coverFit==='contain'){
      const image=texture.image,canvas=document.createElement('canvas');
      canvas.width=Math.ceil(Math.max(image.width,image.height*width/height));canvas.height=Math.ceil(canvas.width*height/width);
@@ -47,12 +49,14 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
     setFaces(runtime.getFaces());render();
    });
    poster.colorSpace=THREE.SRGBColorSpace;poster.anisotropy=renderer.capabilities.getMaxAnisotropy();item.poster=poster;if(!item.live||item.texture!==item.live)item.texture=poster;
+   };
    const video=runtime.projectVideoElements.get(project.id);
    if(video){
     const live=new THREE.VideoTexture(video);item.live=live;live.colorSpace=THREE.SRGBColorSpace;live.minFilter=live.magFilter=THREE.LinearFilter;
     const reveal=()=>{if(video.readyState<2)return;fit(live);item.texture=live;setFaces(runtime.getFaces());render()};
     video.addEventListener('loadeddata',reveal);video.addEventListener('playing',reveal);
     video.addEventListener('loadedmetadata',()=>fit(live));
+    video.addEventListener('emptied',()=>{item.texture=item.poster;setFaces(runtime.getFaces());render();});
     if(video.readyState>=2)reveal();
    }
   });
@@ -62,7 +66,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
    plane.position.set(0,Math.sin(i*Math.PI/2)*height/2,Math.cos(i*Math.PI/2)*height/2);
    roll.add(plane);faces.push(plane);
   }
-  function setFaces(mapping){mapping.forEach(({face,id})=>{if(faces[face]){faces[face].material.map=textures.get(id)?.texture||null;faces[face].material.needsUpdate=true}})}
+  function setFaces(mapping){mapping.forEach(({face,id})=>{const item=textures.get(id);item?.loadPoster();if(faces[face]){faces[face].material.map=item?.texture||null;faces[face].material.needsUpdate=true}})}
   function render(){renderer.render(scene,camera);const face=faces[((Math.round(step)%4)+4)%4];if(face){const points=[[-width/2,-height/2],[width/2,-height/2],[width/2,height/2],[-width/2,height/2]].map(([x,y])=>face.localToWorld(new THREE.Vector3(x,y,0)).project(camera)).map(p=>[(p.x+1)*innerWidth/2,(1-p.y)*innerHeight/2]);document.querySelector('#scene').dataset.sculptureBounds=JSON.stringify({left:Math.min(...points.map(p=>p[0])),top:Math.min(...points.map(p=>p[1])),width:Math.max(...points.map(p=>p[0]))-Math.min(...points.map(p=>p[0])),height:Math.max(...points.map(p=>p[1]))-Math.min(...points.map(p=>p[1]))})}}
   const power2In=t=>t*t*t,power2Out=t=>1-(1-t)**3,power2InOut=t=>t<.5?4*t**3:1-(-2*t+2)**3/2,power3InOut=t=>t<.5?8*t**4:1-(-2*t+2)**4/2;
   function tween(duration,update){return new Promise(resolve=>{const start=performance.now();function frame(now){const t=Math.min(1,(now-start)/duration);update(t);render();if(t<1)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)})}

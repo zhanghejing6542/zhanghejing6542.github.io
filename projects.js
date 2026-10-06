@@ -430,3 +430,9 @@ const projectVisits={
  drama:[{label:'VIEW MORE',href:dramaProject.collectionURL}]
 };
 projects.forEach(p=>p.visits=projectVisits[p.id]||[]);
+// The 1600px sculpture face is sufficient for its on-screen size; the project
+// hero and full-resolution viewer keep the untouched 3200px original.
+projects.find(p=>p.id==='portrait').sculptureCover='/assets/image-delivery-v23/page-5.webp';
+// Same original resolution and one shared buffer on the sculpture and detail.
+// Original streams remain available; iπ keeps its smaller original encoding.
+projects.forEach(p=>{if(['sound','fireman','drama','pinhaofan','shadows'].includes(p.id)){p.video=`/assets/video-delivery-v26/${p.id}-hq.mp4?v=26`;p.detailVideo=p.video;}});

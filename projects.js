@@ -436,3 +436,6 @@ projects.find(p=>p.id==='portrait').sculptureCover='/assets/image-delivery-v23/p
 // Same original resolution and one shared buffer on the sculpture and detail.
 // Original streams remain available; iπ keeps its smaller original encoding.
 projects.forEach(p=>{if(['sound','fireman','drama','pinhaofan','shadows'].includes(p.id)){p.video=`/assets/video-delivery-v26/${p.id}-hq.mp4?v=26`;p.detailVideo=p.video;}});
+// Short loops copy high-resolution packets; detail/viewer sources stay complete.
+const heroDimensions={sound:[2560,1440],fireman:[1920,1080],drama:[2076,1080],ipx:[1920,1080],pinhaofan:[1912,1080],shadows:[1920,1080]};
+projects.forEach(p=>{if(p.video){p.video=`/assets/video-delivery-v27/${p.id}-loop.mp4?v=27`;p.heroDimensions=heroDimensions[p.id];}});

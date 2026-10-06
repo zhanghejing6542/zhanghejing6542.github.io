@@ -26,7 +26,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
    texture.offset.set((1-texture.repeat.x)/2,(1-texture.repeat.y)/2);
   };
   runtime.projects.forEach(project=>{
-   const item={texture:null,poster:null,live:null,posterRequested:false};textures.set(project.id,item);
+   const item={texture:null,poster:null,lives:new Map(),posterRequested:false};textures.set(project.id,item);
    item.loadPoster=()=>{
    if(item.posterRequested)return;item.posterRequested=true;
    const poster=loader.load(project.sculptureCover||project.videoPoster||project.cover,texture=>{
@@ -36,7 +36,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
      const context=canvas.getContext('2d');context.fillStyle=project.coverBackground;context.fillRect(0,0,canvas.width,canvas.height);
      const scale=Math.min(canvas.width/image.width,canvas.height/image.height),iw=image.width*scale,ih=image.height*scale;
      context.drawImage(image,(canvas.width-iw)/2,(canvas.height-ih)/2,iw,ih);
-     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;if(!item.live||item.texture!==item.live)item.texture=composed;texture.dispose();
+     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;texture.dispose();
     }else if(!project.previews&&!project.video){
      const image=texture.image,canvas=document.createElement('canvas');
      canvas.width=Math.ceil(Math.max(image.width/.7,image.height/.8*width/height));canvas.height=Math.ceil(canvas.width*height/width);
@@ -44,19 +44,18 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
      const scale=Math.min(canvas.width*.7/image.width,canvas.height*.8/image.height),iw=image.width*scale,ih=image.height*scale;
      context.drawImage(image,(canvas.width-iw)/2,(canvas.height-ih)/2,iw,ih);
      context.font=`800 ${canvas.width*.072}px Monument Ultra, sans-serif`;context.fillStyle='white';context.fillText(project.en,canvas.width*.08,canvas.height*.91);
-     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;if(!item.live||item.texture!==item.live)item.texture=composed;texture.dispose();
+     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;texture.dispose();
     }else{fit(texture);texture.needsUpdate=true}
     setFaces(runtime.getFaces());render();
    });
-   poster.colorSpace=THREE.SRGBColorSpace;poster.anisotropy=renderer.capabilities.getMaxAnisotropy();item.poster=poster;if(!item.live||item.texture!==item.live)item.texture=poster;
+   poster.colorSpace=THREE.SRGBColorSpace;poster.anisotropy=renderer.capabilities.getMaxAnisotropy();item.poster=poster;
    };
-   const video=runtime.projectVideoElements.get(project.id);
-   if(video){
-    const live=new THREE.VideoTexture(video);item.live=live;live.colorSpace=THREE.SRGBColorSpace;live.minFilter=live.magFilter=THREE.LinearFilter;
-    const reveal=()=>{if(video.readyState<2)return;fit(live);item.texture=live;setFaces(runtime.getFaces());render()};
+   for(const video of [runtime.projectVideoElements.get(project.id),runtime.detailVideoElements.get(project.id)].filter(Boolean)){
+    const live=new THREE.VideoTexture(video);item.lives.set(video,live);live.colorSpace=THREE.SRGBColorSpace;live.minFilter=live.magFilter=THREE.LinearFilter;
+    const reveal=()=>{if(video.readyState<2)return;fit(live);setFaces(runtime.getFaces());render()};
     video.addEventListener('loadeddata',reveal);video.addEventListener('playing',reveal);
     video.addEventListener('loadedmetadata',()=>fit(live));
-    video.addEventListener('emptied',()=>{item.texture=item.poster;setFaces(runtime.getFaces());render();});
+    video.addEventListener('emptied',()=>{setFaces(runtime.getFaces());render();});
     if(video.readyState>=2)reveal();
    }
   });
@@ -66,7 +65,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
    plane.position.set(0,Math.sin(i*Math.PI/2)*height/2,Math.cos(i*Math.PI/2)*height/2);
    roll.add(plane);faces.push(plane);
   }
-  function setFaces(mapping){mapping.forEach(({face,id})=>{const item=textures.get(id);item?.loadPoster();if(faces[face]){faces[face].material.map=item?.texture||null;faces[face].material.needsUpdate=true}})}
+  function setFaces(mapping){mapping.forEach(({face,id})=>{const item=textures.get(id);item?.loadPoster();const video=runtime.getSculptureVideo(id),preview=runtime.projectVideoElements.get(id);if(item){item.texture=video?.readyState>=2?item.lives.get(video):preview?.readyState>=2?item.lives.get(preview):item.poster;}if(faces[face]){const texture=item?.texture||null;if(faces[face].material.map!==texture){faces[face].material.map=texture;faces[face].material.needsUpdate=true;}document.querySelector('.face-'+face).dataset.textureTier=video?.readyState>=2?video.dataset.playbackTier:preview?.readyState>=2?'home':'poster';}})}
   function render(){renderer.render(scene,camera);const face=faces[((Math.round(step)%4)+4)%4];if(face){const points=[[-width/2,-height/2],[width/2,-height/2],[width/2,height/2],[-width/2,height/2]].map(([x,y])=>face.localToWorld(new THREE.Vector3(x,y,0)).project(camera)).map(p=>[(p.x+1)*innerWidth/2,(1-p.y)*innerHeight/2]);document.querySelector('#scene').dataset.sculptureBounds=JSON.stringify({left:Math.min(...points.map(p=>p[0])),top:Math.min(...points.map(p=>p[1])),width:Math.max(...points.map(p=>p[0]))-Math.min(...points.map(p=>p[0])),height:Math.max(...points.map(p=>p[1]))-Math.min(...points.map(p=>p[1]))})}}
   const power2In=t=>t*t*t,power2Out=t=>1-(1-t)**3,power2InOut=t=>t<.5?4*t**3:1-(-2*t+2)**3/2,power3InOut=t=>t<.5?8*t**4:1-(-2*t+2)**4/2;
   function tween(duration,update){return new Promise(resolve=>{const start=performance.now();function frame(now){const t=Math.min(1,(now-start)/duration);update(t);render();if(t<1)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)})}

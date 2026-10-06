@@ -412,12 +412,12 @@ projects.forEach(p=>p.gallery.forEach(item=>{const file=(item.posterImage||item.
 const dramaProject=projects.find(p=>p.id==='drama');
 dramaProject.collectionURL='https://acnmjl4wgife.feishu.cn/wiki/B8gzwC8Zzid4U0kfnGYcrdYYn71';
 dramaProject.gallery=[
- {title:'The Rise of Silas Lapham',src:'/assets/drama/silas-lapham.webp',preview:'/assets/drama/silas-preview.mp4?v=21',episodes:'Ep 1–21'},
- {title:'The Awakening',src:'/assets/drama/awakening.webp',preview:'/assets/drama/awakening-preview.mp4?v=21',episodes:'Ep 1–12'},
- {title:'The Barcelona Bargain',src:'/assets/drama/barcelona.webp',preview:'/assets/drama/barcelona-preview.mp4?v=21',episodes:'Ep 1–17'},
- {title:'The Master’s Secret',src:'/assets/drama/masters-secret.webp',preview:'/assets/drama/masters-preview.mp4?v=21',episodes:'Ep 1–5'},
- {title:'My Deadbeat Dad Owns the World',src:'/assets/drama/deadbeat.webp',preview:'/assets/drama/deadbeat-preview.mp4?v=21',episodes:'Ep 1–6'},
- {title:'The Bible',src:'/assets/drama/bible.webp',preview:'/assets/drama/bible-preview.mp4?v=21',episodes:'Ep 1–9'}
+ {title:'The Rise of Silas Lapham',src:'/assets/drama/silas-lapham.webp',preview:'/assets/video-delivery-v23/silas-preview.mp4',episodes:'Ep 1–21'},
+ {title:'The Awakening',src:'/assets/drama/awakening.webp',preview:'/assets/video-delivery-v23/awakening-preview.mp4',episodes:'Ep 1–12'},
+ {title:'The Barcelona Bargain',src:'/assets/drama/barcelona.webp',preview:'/assets/video-delivery-v23/barcelona-preview.mp4',episodes:'Ep 1–17'},
+ {title:'The Master’s Secret',src:'/assets/drama/masters-secret.webp',preview:'/assets/video-delivery-v23/masters-preview.mp4',episodes:'Ep 1–5'},
+ {title:'My Deadbeat Dad Owns the World',src:'/assets/drama/deadbeat.webp',preview:'/assets/video-delivery-v23/deadbeat-preview.mp4',episodes:'Ep 1–6'},
+ {title:'The Bible',src:'/assets/drama/bible.webp',preview:'/assets/video-delivery-v23/bible-preview.mp4',episodes:'Ep 1–9'}
 ];
 const projectVisits={
  sound:[{label:'VIEW THE WEBSITE',href:'https://zhanghejing6542.github.io/tt-text-to-music-public/'}],

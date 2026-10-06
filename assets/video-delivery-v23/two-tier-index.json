@@ -1,0 +1,98 @@
+[
+  {
+    "id": "sound",
+    "tier": "home",
+    "width": 800,
+    "maxVideoKbps": 350,
+    "bytes": 2426141,
+    "path": "/assets/video-delivery-v23/sound-home.mp4"
+  },
+  {
+    "id": "sound",
+    "tier": "detail",
+    "width": 1280,
+    "maxVideoKbps": 850,
+    "bytes": 6614648,
+    "path": "/assets/video-delivery-v23/sound-detail.mp4"
+  },
+  {
+    "id": "fireman",
+    "tier": "home",
+    "width": 800,
+    "maxVideoKbps": 350,
+    "bytes": 695767,
+    "path": "/assets/video-delivery-v23/fireman-home.mp4"
+  },
+  {
+    "id": "fireman",
+    "tier": "detail",
+    "width": 1280,
+    "maxVideoKbps": 850,
+    "bytes": 1874483,
+    "path": "/assets/video-delivery-v23/fireman-detail.mp4"
+  },
+  {
+    "id": "drama",
+    "tier": "home",
+    "width": 800,
+    "maxVideoKbps": 350,
+    "bytes": 658609,
+    "path": "/assets/video-delivery-v23/drama-home.mp4"
+  },
+  {
+    "id": "drama",
+    "tier": "detail",
+    "width": 1280,
+    "maxVideoKbps": 850,
+    "bytes": 1771587,
+    "path": "/assets/video-delivery-v23/drama-detail.mp4"
+  },
+  {
+    "id": "ipx",
+    "tier": "home",
+    "width": 800,
+    "maxVideoKbps": 350,
+    "bytes": 4340009,
+    "path": "/assets/video-delivery-v23/ipx-home.mp4"
+  },
+  {
+    "id": "ipx",
+    "tier": "detail",
+    "width": 1280,
+    "maxVideoKbps": 850,
+    "bytes": 11115949,
+    "path": "/assets/video-delivery-v23/ipx-detail.mp4"
+  },
+  {
+    "id": "pinhaofan",
+    "tier": "home",
+    "width": 800,
+    "maxVideoKbps": 350,
+    "bytes": 5489457,
+    "path": "/assets/video-delivery-v23/pinhaofan-home.mp4"
+  },
+  {
+    "id": "pinhaofan",
+    "tier": "detail",
+    "width": 1280,
+    "maxVideoKbps": 850,
+    "bytes": 14617690,
+    "path": "/assets/video-delivery-v23/pinhaofan-detail.mp4"
+  },
+  {
+    "id": "shadows",
+    "tier": "home",
+    "width": 800,
+    "maxVideoKbps": 350,
+    "bytes": 4618844,
+    "path": "/assets/video-delivery-v23/shadows-home.mp4"
+  },
+  {
+    "id": "shadows",
+    "tier": "detail",
+    "width": 1280,
+    "maxVideoKbps": 850,
+    "bytes": 12559662,
+    "path": "/assets/video-delivery-v23/shadows-detail.mp4"
+  }
+]

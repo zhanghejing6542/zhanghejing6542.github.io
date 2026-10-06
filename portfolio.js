@@ -20,7 +20,12 @@ projects.forEach(project=>project.gallery.forEach(item=>{
 }));
 // Reuse prepared video elements across faces instead of swapping image posters for video.
 const projectVideoElements=new Map(projects.filter(p=>p.video).map(p=>{const v=document.createElement('video');v.poster=p.videoPoster;v.muted=true;v.loop=true;v.playsInline=true;v.preload='none';v.dataset.videoSource=p.video;v.dataset.projectVideo=p.id;v.setAttribute('aria-hidden','true');return [p.id,v]}));
-function ensureProjectVideo(video,preload='metadata'){if(!video)return;video.preload=preload;if(!video.getAttribute('src')){video.dataset.loadStartedAt=performance.now().toFixed(1);video.src=video.dataset.videoSource;}}
+function ensureProjectVideo(video,preload='metadata',tier='home'){
+ if(!video)return;
+ const project=projects.find(p=>p.id===video.dataset.projectVideo),source=tier==='detail'?project.detailVideo:project.video;
+ video.preload=preload;
+ if(video.getAttribute('src')!==source){video.pause();video.dataset.loadStartedAt=performance.now().toFixed(1);delete video.dataset.firstFrameMs;video.dataset.playbackTier=tier;video.src=source;}
+}
 projectVideoElements.forEach(video=>video.addEventListener('loadeddata',()=>{video.dataset.firstFrameMs=(performance.now()-Number(video.dataset.loadStartedAt)).toFixed(1);}));
 let neighbourPlaybackTimer=0,neighbourPlaybackKey='';
 let audioContext=null,audioFallbackFrame=0,audioFallbackTime=0;
@@ -85,7 +90,7 @@ function syncProjectVideoPlayback(){
   if(key!==neighbourPlaybackKey){clearTimeout(neighbourPlaybackTimer);neighbourPlaybackTimer=0;neighbourPlaybackKey=key;}
   projectVideoElements.forEach((video,id)=>{
     if(!canPlay||!visibleIds.has(id)||id===frozenProjectId){video.pause();video.preload='metadata';}
-    else if(id===activeId){ensureProjectVideo(video,'auto');if(video.paused)video.play().catch(()=>{});}
+    else if(id===activeId){ensureProjectVideo(video,'auto',!detail.hidden||transitionProjectId!==null?'detail':'home');if(video.paused)video.play().catch(()=>{});}
   });
   if(canPlay&&!neighbourPlaybackTimer){
     const neighbours=[...visibleIds].filter(id=>id!==activeId&&id!==frozenProjectId);
@@ -106,8 +111,8 @@ function cardMarkup(item,i=0,playable=true,inline=false){
  if(item.video)return playable?`<video src="${item.src}" poster="${item.posterImage}" controls playsinline preload="metadata" aria-label="${escapeHTML(item.title)}"></video>`:`<img src="${item.posterImage}" alt="${escapeHTML(item.title)}" decoding="async" loading="lazy"><span class="video-badge">PLAY DEMO</span>`;
  return item.poster?`<div class="story-card"><small>SERIES ${String(i+1).padStart(2,'0')}</small><strong>${escapeHTML(item.title)}</strong></div>`:`<img src="${inline&&item.displaySrc?item.displaySrc:item.src}"${item.transparent?' class="transparent-artwork"':''} alt="${escapeHTML(item.title)}"${item.width&&item.height?` width="${item.width}" height="${item.height}"`:''} decoding="async" loading="lazy">`;
 }
-function warmProjectVideo(index){const video=projectVideoElements.get(projects[modulo(index,projects.length)].id);ensureProjectVideo(video,'metadata');}
-async function prepareProjectVideo(index){const video=projectVideoElements.get(projects[index].id);if(!video)return;ensureProjectVideo(video,'auto');if(video.readyState>=2)return;await Promise.race([new Promise(resolve=>{video.addEventListener('loadeddata',resolve,{once:true});video.addEventListener('error',resolve,{once:true})}),new Promise(resolve=>setTimeout(resolve,1200))])}
+function warmProjectVideo(index,tier='home'){const video=projectVideoElements.get(projects[modulo(index,projects.length)].id);ensureProjectVideo(video,'metadata',tier);}
+async function prepareProjectVideo(index){const video=projectVideoElements.get(projects[index].id);if(!video)return;ensureProjectVideo(video,'auto','detail');if(video.readyState>=2)return;await Promise.race([new Promise(resolve=>{video.addEventListener('loadeddata',resolve,{once:true});video.addEventListener('error',resolve,{once:true})}),new Promise(resolve=>setTimeout(resolve,1200))])}
 async function restartProjectVideo(index){const video=projectVideoElements.get(projects[index].id);if(!video||reduced)return;await prepareProjectVideo(index);if(video.readyState>=1)video.currentTime=0;video.muted=true;video.play().catch(()=>{});await Promise.race([new Promise(resolve=>{if(video.requestVideoFrameCallback)video.requestVideoFrameCallback(resolve);else if(video.readyState>=2&&!video.seeking)resolve();else video.addEventListener('seeked',resolve,{once:true})}),new Promise(resolve=>setTimeout(resolve,700))])}
 projects.forEach((p,i)=>{const button=document.createElement('button');let warmTimer=0;button.type='button';button.dataset.index=i;button.textContent=p.en;button.setAttribute('aria-label',`选择${p.en}`);button.addEventListener('pointerenter',()=>{warmTimer=setTimeout(()=>warmProjectVideo(i),180)});button.addEventListener('pointerleave',()=>clearTimeout(warmTimer));button.addEventListener('focus',()=>warmProjectVideo(i));button.addEventListener('click',()=>{clearTimeout(warmTimer);if(animating)return;if(compactViewport.matches||i===selected)openDetail(i);else selectProject(i)});$('#project-names').append(button)});
 function fitProjectNames(){const context=document.createElement('canvas').getContext('2d');all('.project-names button').forEach((button,i)=>{button.style.fontSize='';const style=getComputedStyle(button);context.font=style.fontWeight+' '+style.fontSize+' '+style.fontFamily;const base=parseFloat(style.fontSize),available=i===0&&!compactViewport.matches?Math.min(innerWidth-36,$('.top-nav').getBoundingClientRect().left-32):innerWidth-36,measured=context.measureText(button.textContent).width;let size=Math.min(base,base*available/Math.max(1,measured));if(!compactViewport.matches)size=Math.min(size,(innerHeight-16-32-(projects.length-1)*6)/(projects.length*.85));button.style.fontSize=Math.max(compactViewport.matches?12:16,size)+'px'})}
@@ -243,7 +248,7 @@ function createProjectSwitch(fromIndex,toIndex){
 async function openDetail(index,{route=true,instant=false}={}){
   if(animating)return;animating=true;closePopups();cursor.style.opacity=0;lastFocus=document.activeElement;selectProject(index,{instant:true});
   const animateTransition=!reduced&&!instant&&!compactViewport.matches&&detail.hidden;
-  warmProjectVideo(index);
+  warmProjectVideo(index,'detail');
   const openingVideo=projectVideoElements.get(projects[index].id);if(openingVideo?.readyState>=1)openingVideo.currentTime=0;
   const sculpture=window.portfolioSculpture;
   const transition=animateTransition&&!sculpture?animateHomeProject(true):null;
@@ -274,7 +279,7 @@ async function nextDetail(){
   const nextIndex=modulo(selected+1,projects.length);
   animating=true;
   frozenProjectId=projects[openProject].id;projectVideoElements.get(frozenProjectId)?.pause();updateSoundState();
-  warmProjectVideo(nextIndex);await prepareProjectVideo(nextIndex);
+  warmProjectVideo(nextIndex,'detail');await prepareProjectVideo(nextIndex);
   all('.detail video').forEach(v=>v.pause());dramaPreviewElements.forEach(v=>v.pause());
   if(reduced||compactViewport.matches){
     selectProject(nextIndex,{direction:1,instant:true});await restartProjectVideo(nextIndex);renderDetail(nextIndex);frozenProjectId=null;syncProjectVideoPlayback();history.pushState({project:nextIndex},'',projectURL(nextIndex));animating=false;return;

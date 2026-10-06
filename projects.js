@@ -398,8 +398,10 @@ modelProject.gallery.unshift({src:modelProject.cover,title:'MODEL GEM / COVER',w
 // User-supplied full-length project artwork replaces the temporary folder picture.
 streakProject.gallery=[{src:'/assets/streak/streak-pet-project-v3.png',title:'STREAK PET BOT / PROJECT'}];
 projects.forEach(p=>p.pending=false);
-const originalProjectVideos={sound:'/assets/videos/text-to-music.mp4?v=21',fireman:'/assets/videos/streak-pet-bot.mp4?v=22',drama:'/assets/videos/ai-drama.mp4?v=21',ipx:'/assets/videos/ipx.mp4?v=21',pinhaofan:'/assets/videos/piece-together.mp4?v=21',shadows:'/assets/videos/shadows-v16.mp4?v=21'};
-projects.forEach(p=>{if(originalProjectVideos[p.id]){p.originalVideo=originalProjectVideos[p.id];p.video=`/assets/video-delivery-v23/${p.id}-home.mp4`;p.detailVideo=`/assets/video-delivery-v23/${p.id}-detail.mp4`;p.highVideo=`/assets/video-delivery-v23/${p.id}.mp4`;p.videoPoster=`/assets/video-delivery-v23/${p.id}-first-frame.jpg`;p.cover=p.videoPoster;p.folder=p.videoPoster;p.gallery.unshift({src:p.originalVideo,video:true,posterImage:p.videoPoster,title:p.en+' / DEMO'})}});
+// Quality-first delivery: reuse the original encoded stream on both surfaces.
+// Sharing one URL also avoids throwing away a buffered video when opening detail.
+const originalProjectVideos={sound:'/assets/videos/text-to-music.mp4?v=24',fireman:'/assets/videos/streak-pet-bot.mp4?v=24',drama:'/assets/videos/ai-drama.mp4?v=24',ipx:'/assets/videos/ipx.mp4?v=24',pinhaofan:'/assets/videos/piece-together.mp4?v=24',shadows:'/assets/videos/shadows-v16.mp4?v=24'};
+projects.forEach(p=>{if(originalProjectVideos[p.id]){p.originalVideo=originalProjectVideos[p.id];p.video=p.originalVideo;p.detailVideo=p.originalVideo;p.highVideo=p.originalVideo;p.videoPoster=`/assets/video-delivery-v23/${p.id}-first-frame.jpg?v=24`;p.cover=p.videoPoster;p.folder=p.videoPoster;p.gallery.unshift({src:p.originalVideo,video:true,posterImage:p.videoPoster,title:p.en+' / DEMO'})}});
 // Full PDF pages at a consistent 3200px width; no source-edge trimming.
 projects.forEach(p=>{const fresh=src=>typeof src==='string'&&src.includes('/assets/portfolio-hires/')?src.replace('/assets/portfolio-hires/','/assets/portfolio-full-v15/').replace(/\.jpg$/,'.webp'):src;p.cover=fresh(p.cover);if(Array.isArray(p.previews))p.previews=p.previews.map(fresh);if(Array.isArray(p.media))p.media=p.media.map(fresh);p.gallery.forEach(item=>{item.src=fresh(item.src);if(item.posterImage)item.posterImage=fresh(item.posterImage)})});
 const shadowsProject=projects.find(p=>p.id==='shadows');shadowsProject.gallery=shadowsProject.gallery.filter(item=>item.video);shadowsProject.gallery.forEach(item=>item.posterImage=shadowsProject.videoPoster);
@@ -412,12 +414,12 @@ projects.forEach(p=>p.gallery.forEach(item=>{const file=(item.posterImage||item.
 const dramaProject=projects.find(p=>p.id==='drama');
 dramaProject.collectionURL='https://acnmjl4wgife.feishu.cn/wiki/B8gzwC8Zzid4U0kfnGYcrdYYn71';
 dramaProject.gallery=[
- {title:'The Rise of Silas Lapham',src:'/assets/drama/silas-lapham.webp',preview:'/assets/video-delivery-v23/silas-preview.mp4',episodes:'Ep 1–21'},
- {title:'The Awakening',src:'/assets/drama/awakening.webp',preview:'/assets/video-delivery-v23/awakening-preview.mp4',episodes:'Ep 1–12'},
- {title:'The Barcelona Bargain',src:'/assets/drama/barcelona.webp',preview:'/assets/video-delivery-v23/barcelona-preview.mp4',episodes:'Ep 1–17'},
- {title:'The Master’s Secret',src:'/assets/drama/masters-secret.webp',preview:'/assets/video-delivery-v23/masters-preview.mp4',episodes:'Ep 1–5'},
- {title:'My Deadbeat Dad Owns the World',src:'/assets/drama/deadbeat.webp',preview:'/assets/video-delivery-v23/deadbeat-preview.mp4',episodes:'Ep 1–6'},
- {title:'The Bible',src:'/assets/drama/bible.webp',preview:'/assets/video-delivery-v23/bible-preview.mp4',episodes:'Ep 1–9'}
+ {title:'The Rise of Silas Lapham',src:'/assets/drama/silas-lapham.webp',preview:'/assets/drama/silas-preview.mp4?v=24',episodes:'Ep 1–21'},
+ {title:'The Awakening',src:'/assets/drama/awakening.webp',preview:'/assets/drama/awakening-preview.mp4?v=24',episodes:'Ep 1–12'},
+ {title:'The Barcelona Bargain',src:'/assets/drama/barcelona.webp',preview:'/assets/drama/barcelona-preview.mp4?v=24',episodes:'Ep 1–17'},
+ {title:'The Master’s Secret',src:'/assets/drama/masters-secret.webp',preview:'/assets/drama/masters-preview.mp4?v=24',episodes:'Ep 1–5'},
+ {title:'My Deadbeat Dad Owns the World',src:'/assets/drama/deadbeat.webp',preview:'/assets/drama/deadbeat-preview.mp4?v=24',episodes:'Ep 1–6'},
+ {title:'The Bible',src:'/assets/drama/bible.webp',preview:'/assets/drama/bible-preview.mp4?v=24',episodes:'Ep 1–9'}
 ];
 const projectVisits={
  sound:[{label:'VIEW THE WEBSITE',href:'https://zhanghejing6542.github.io/tt-text-to-music-public/'}],

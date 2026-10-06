@@ -398,12 +398,11 @@ modelProject.gallery.unshift({src:modelProject.cover,title:'MODEL GEM / COVER',w
 // User-supplied full-length project artwork replaces the temporary folder picture.
 streakProject.gallery=[{src:'/assets/streak/streak-pet-project-v3.png',title:'STREAK PET BOT / PROJECT'}];
 projects.forEach(p=>p.pending=false);
-const projectVideos={sound:'/assets/videos/text-to-music.mp4?v=21',fireman:'/assets/videos/streak-pet-bot.mp4?v=22',drama:'/assets/videos/ai-drama.mp4?v=21',ipx:'/assets/videos/ipx.mp4?v=21',pinhaofan:'/assets/videos/piece-together.mp4?v=21',shadows:'/assets/videos/shadows-v16.mp4?v=21'};
-const projectVideoPosters={drama:'/assets/videos/ai-drama-frame.jpg',shadows:'/assets/videos/shadows-v16-frame.jpg'};
-projects.forEach(p=>{if(projectVideos[p.id]){p.video=projectVideos[p.id];p.videoPoster=projectVideoPosters[p.id];p.gallery.unshift({src:p.video,video:true,posterImage:p.videoPoster||p.cover,title:p.en+' / DEMO'})}});
+const originalProjectVideos={sound:'/assets/videos/text-to-music.mp4?v=21',fireman:'/assets/videos/streak-pet-bot.mp4?v=22',drama:'/assets/videos/ai-drama.mp4?v=21',ipx:'/assets/videos/ipx.mp4?v=21',pinhaofan:'/assets/videos/piece-together.mp4?v=21',shadows:'/assets/videos/shadows-v16.mp4?v=21'};
+projects.forEach(p=>{if(originalProjectVideos[p.id]){p.originalVideo=originalProjectVideos[p.id];p.video=`/assets/video-delivery-v23/${p.id}.mp4`;p.videoPoster=`/assets/video-delivery-v23/${p.id}-first-frame.jpg`;p.cover=p.videoPoster;p.folder=p.videoPoster;p.gallery.unshift({src:p.originalVideo,video:true,posterImage:p.videoPoster,title:p.en+' / DEMO'})}});
 // Full PDF pages at a consistent 3200px width; no source-edge trimming.
 projects.forEach(p=>{const fresh=src=>typeof src==='string'&&src.includes('/assets/portfolio-hires/')?src.replace('/assets/portfolio-hires/','/assets/portfolio-full-v15/').replace(/\.jpg$/,'.webp'):src;p.cover=fresh(p.cover);if(Array.isArray(p.previews))p.previews=p.previews.map(fresh);if(Array.isArray(p.media))p.media=p.media.map(fresh);p.gallery.forEach(item=>{item.src=fresh(item.src);if(item.posterImage)item.posterImage=fresh(item.posterImage)})});
-const shadowsProject=projects.find(p=>p.id==='shadows');shadowsProject.gallery=shadowsProject.gallery.filter(item=>item.video);shadowsProject.cover='/assets/videos/shadows-v16-frame.jpg';shadowsProject.gallery.forEach(item=>item.posterImage=shadowsProject.cover);
+const shadowsProject=projects.find(p=>p.id==='shadows');shadowsProject.gallery=shadowsProject.gallery.filter(item=>item.video);shadowsProject.gallery.forEach(item=>item.posterImage=shadowsProject.videoPoster);
 shadowsProject.gallery.push(
  {src:'/assets/shadows/shadows-project.png',title:'SHADOWS ARE EVERYWHERE / POSTERS & EXHIBITION',width:3032,height:7996,clipHeight:5788},
  {src:'/assets/shadows/shadows-project-v2.png',title:'SHADOWS ARE EVERYWHERE / CARDS',width:5000,height:3336}

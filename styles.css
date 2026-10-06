@@ -131,6 +131,10 @@ body:has(#detail.is-open:not([hidden]):not(.switching)) #home{visibility:hidden}
 .case-gallery .gallery-item:hover img[src^="/assets/modelgem-demos/model-demo-"]{transform:none}
 .detail-cover.preserve-cover>button{position:absolute;inset:0;transform:none;width:100%;height:100%}
 .detail-cover.preserve-cover img{width:100%;height:100%;object-fit:contain}
+.case-gallery img.transparent-artwork{display:block;width:100%;height:auto;object-fit:contain;background:transparent;border:0;border-radius:0;box-shadow:none;filter:none;transition:none}
+.case-gallery .gallery-item:hover img.transparent-artwork{transform:none}
+.case-gallery video.gallery-motion{display:block;width:100%;height:auto;object-fit:cover;border:0;border-radius:0;box-shadow:none;background:transparent;pointer-events:none}
+.case-gallery .gallery-item:hover video.gallery-motion{transform:none}
 @media(max-width:768px){.detail-cover.preserve-cover>button{position:static;height:auto}.detail-cover.preserve-cover img{height:auto}}
 @media(max-width:768px){
  .language-toggle{min-height:46px;width:46px;min-width:46px}

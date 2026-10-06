@@ -9,7 +9,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
   const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
   camera.position.set(0,2.5,9);camera.lookAt(0,0,0);
   const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);
   renderer.domElement.className='sculpture-canvas';renderer.domElement.setAttribute('aria-hidden','true');
   document.querySelector('#scene').append(renderer.domElement);
   const entry=new THREE.Group(),pose=new THREE.Group(),roll=new THREE.Group();
@@ -26,7 +26,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
    texture.offset.set((1-texture.repeat.x)/2,(1-texture.repeat.y)/2);
   };
   runtime.projects.forEach(project=>{
-   const item={texture:null,poster:null};textures.set(project.id,item);
+   const item={texture:null,poster:null,live:null};textures.set(project.id,item);
    const poster=loader.load(project.videoPoster||project.cover,texture=>{
     if(project.coverFit==='contain'){
      const image=texture.image,canvas=document.createElement('canvas');
@@ -34,7 +34,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
      const context=canvas.getContext('2d');context.fillStyle=project.coverBackground;context.fillRect(0,0,canvas.width,canvas.height);
      const scale=Math.min(canvas.width/image.width,canvas.height/image.height),iw=image.width*scale,ih=image.height*scale;
      context.drawImage(image,(canvas.width-iw)/2,(canvas.height-ih)/2,iw,ih);
-     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;item.texture=composed;texture.dispose();
+     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;if(!item.live||item.texture!==item.live)item.texture=composed;texture.dispose();
     }else if(!project.previews&&!project.video){
      const image=texture.image,canvas=document.createElement('canvas');
      canvas.width=Math.ceil(Math.max(image.width/.7,image.height/.8*width/height));canvas.height=Math.ceil(canvas.width*height/width);
@@ -42,14 +42,14 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
      const scale=Math.min(canvas.width*.7/image.width,canvas.height*.8/image.height),iw=image.width*scale,ih=image.height*scale;
      context.drawImage(image,(canvas.width-iw)/2,(canvas.height-ih)/2,iw,ih);
      context.font=`800 ${canvas.width*.072}px Monument Ultra, sans-serif`;context.fillStyle='white';context.fillText(project.en,canvas.width*.08,canvas.height*.91);
-     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;item.texture=composed;texture.dispose();
+     const composed=new THREE.CanvasTexture(canvas);composed.colorSpace=THREE.SRGBColorSpace;item.poster=composed;if(!item.live||item.texture!==item.live)item.texture=composed;texture.dispose();
     }else{fit(texture);texture.needsUpdate=true}
     setFaces(runtime.getFaces());render();
    });
-   poster.colorSpace=THREE.SRGBColorSpace;poster.anisotropy=renderer.capabilities.getMaxAnisotropy();item.poster=poster;item.texture=poster;
+   poster.colorSpace=THREE.SRGBColorSpace;poster.anisotropy=renderer.capabilities.getMaxAnisotropy();item.poster=poster;if(!item.live||item.texture!==item.live)item.texture=poster;
    const video=runtime.projectVideoElements.get(project.id);
    if(video){
-    const live=new THREE.VideoTexture(video);live.colorSpace=THREE.SRGBColorSpace;live.minFilter=live.magFilter=THREE.LinearFilter;
+    const live=new THREE.VideoTexture(video);item.live=live;live.colorSpace=THREE.SRGBColorSpace;live.minFilter=live.magFilter=THREE.LinearFilter;
     const reveal=()=>{if(video.readyState<2)return;fit(live);item.texture=live;setFaces(runtime.getFaces());render()};
     video.addEventListener('loadeddata',reveal);video.addEventListener('playing',reveal);
     video.addEventListener('loadedmetadata',()=>fit(live));
@@ -82,7 +82,7 @@ if(runtime&&!matchMedia('(max-width:768px)').matches){
   const api={
    setFaces,
    poster(id){const image=textures.get(id)?.texture?.image;return image instanceof HTMLCanvasElement?image.toDataURL('image/png'):null},
-   frame(rotation,x,y){if(locked)return;if(runtime.getAnimating()){render();return}if(document.querySelector('#detail').hidden){step=(rotation+14.3239449)/90;roll.rotation.x=step*Math.PI/2;pose.rotation.set(.25-y*Math.PI/100,-Math.PI/6+x*Math.PI/72,x*Math.PI/514);render()}},
+   frame(rotation,x,y){if(locked||runtime.getAnimating())return;if(document.querySelector('#detail').hidden){step=(rotation+14.3239449)/90;roll.rotation.x=step*Math.PI/2;pose.rotation.set(.25-y*Math.PI/100,-Math.PI/6+x*Math.PI/72,x*Math.PI/514);render()}},
    async entry(){locked=true;await tween(2200,t=>{const e=power2InOut(t);entry.position.x=19*(1-e);entry.rotation.z=-Math.PI*2*(1-e)});locked=false},
    zoom,
    async next(nextStep){
